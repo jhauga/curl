@@ -43,6 +43,7 @@ typedef enum {
   C_CERT,
   C_CERT_STATUS,
   C_CERT_TYPE,
+  C_CHEAT_SHEET,
   C_CIPHERS,
   C_CLOBBER,
   C_COMPRESSED,

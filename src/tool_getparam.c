@@ -97,6 +97,7 @@ static const struct LongShort aliases[]= {
   {"cert",                       ARG_FILE|ARG_TLS|ARG_CLEAR, 'E', C_CERT},
   {"cert-status",                ARG_BOOL|ARG_TLS, ' ', C_CERT_STATUS},
   {"cert-type",                  ARG_STRG|ARG_TLS, ' ', C_CERT_TYPE},
+  {"cheat-sheet",                ARG_NONE, ' ', C_CHEAT_SHEET},
   {"ciphers",                    ARG_STRG|ARG_TLS, ' ', C_CIPHERS},
   {"clobber",                    ARG_BOOL|ARG_NO, ' ', C_CLOBBER},
   {"compressed",                 ARG_BOOL, ' ', C_COMPRESSED},
@@ -1711,6 +1712,9 @@ static ParameterError opt_none(struct OperationConfig *config,
     break;
   case C_DUMP_CA_EMBED: /* --dump-ca-embed */
     return PARAM_CA_EMBED_REQUESTED;
+  case C_CHEAT_SHEET: /* --cheat-sheet */
+    tool_cheat_sheet();
+    return PARAM_HELP_REQUESTED;
   case C_FTP_PASV: /* --ftp-pasv */
     tool_safefree(config->ftpport);
     break;

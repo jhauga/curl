@@ -405,3 +405,27 @@ void tool_list_engines(void)
   curl_slist_free_all(engines);
   curl_easy_cleanup(curl);
 }
+
+/* Implements --cheat-sheet */
+void tool_cheat_sheet(void)
+{
+  /* Use default cheat sheet output */
+  puts("  Verbose                     Hide progress                     extra info          Write output       Timeout");
+  puts(" --------------------------- --------------------------------- ------------------- ------------------ --------------");
+  puts("  -v                          -s                                -w format           -O                 -m secs");
+  puts("  --trace-ascii file                                                                -o file");
+  puts("");
+  puts("  POST                        multipart                         PUT                 HEAD               custom");
+  puts(" --------------------------- --------------------------------- ------------------- ------------------ --------------");
+  puts("  -d string                   -F name=value                     -T file             -I                 -X METHOD");
+  puts("  -d @file                    -F name=@file");
+  puts("");
+  puts("  Basic auth                  read cookies                      write cookies       send cookies       user-agent");
+  puts(" --------------------------- --------------------------------- ------------------- ------------------ --------------");
+  puts("  -u user:password            -b <file>                         -c <file>           -b \"c=1; d=2\"      -A string");
+  puts("");
+  puts("  Use proxy                   Headers, add/remove               follow redirs       gzip               insecure");
+  puts(" --------------------------- --------------------------------- ------------------- ------------------ --------------");
+  puts("  -x host:port                -H \"name: value\"                  -L                  --compressed       -k");
+  puts("                              -H name:");
+}
