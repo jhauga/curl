@@ -70,7 +70,7 @@ const struct helptxt helptext[] = {
    "Certificate type (DER/PEM/ENG/PROV/P12)",
    CURLHELP_TLS},
   {"    --cheat-sheet",
-   "Helpful curl cheat sheet",
+   "Output helpful curl cheat sheet to the terminal.",
    CURLHELP_CURL},
   {"    --ciphers <list>",
    "TLS 1.2 (1.1, 1.0) ciphers to use",
