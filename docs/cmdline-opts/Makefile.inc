@@ -57,7 +57,6 @@ DPAGES = \
   cert-status.md \
   cert-type.md \
   cert.md \
-  cheat-sheet.md \
   ciphers.md \
   compressed-ssh.md \
   compressed.md \
