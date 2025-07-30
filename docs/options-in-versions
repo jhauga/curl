@@ -22,7 +22,6 @@
 --cert (-E)                          5.0
 --cert-status                        7.41.0
 --cert-type                          7.9.3
---cheat-sheet                        8.16.0
 --ciphers                            7.9
 --compressed                         7.10
 --compressed-ssh                     7.56.0
