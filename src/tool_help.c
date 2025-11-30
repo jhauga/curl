@@ -279,10 +279,8 @@ void tool_help(const char *category)
       char cmdbuf[80];
       if(a->letter != ' ')
         curl_msnprintf(cmdbuf, sizeof(cmdbuf), "\n    -%c, --", a->letter);
-      else if(a->desc & ARG_NO)
-        curl_msnprintf(cmdbuf, sizeof(cmdbuf), "\n    --no-%s", a->lname);
       else
-        curl_msnprintf(cmdbuf, sizeof(cmdbuf), "\n    %s", category);
+        curl_msnprintf(cmdbuf, sizeof(cmdbuf), "\n    --%s", a->lname);
 #ifdef USE_MANUAL
       if(a->cmd == C_XATTR)
         /* this is the last option, which then ends when FILES starts */

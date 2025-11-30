@@ -101,6 +101,7 @@ CURL_CFILES = \
   tool_ssls.c \
   tool_stderr.c \
   tool_strdup.c \
+  tool_sync.c \
   tool_urlglob.c \
   tool_util.c \
   tool_vms.c \
@@ -147,6 +148,7 @@ CURL_HFILES = \
   tool_ssls.h \
   tool_stderr.h \
   tool_strdup.h \
+  tool_sync.h \
   tool_urlglob.h \
   tool_util.h \
   tool_version.h \

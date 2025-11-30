@@ -74,6 +74,7 @@
 #include "tool_parsecfg.h"
 #include "tool_setopt.h"
 #include "tool_ssls.h"
+#include "tool_sync.h"
 #include "tool_urlglob.h"
 #include "tool_util.h"
 #include "tool_writeout.h"
@@ -983,6 +984,7 @@ static CURLcode setup_headerfile(struct OperationConfig *config,
 static CURLcode setup_outfile(struct OperationConfig *config,
                               struct per_transfer *per,
                               struct OutStruct *outs,
+                              struct getout *urlnode,
                               bool *skipped)
 {
   /*
@@ -1046,7 +1048,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
   }
 
   /* Handle --sync option: set time condition based on local file */
-  if(config->sync && !per->skip) {
+  if(urlnode->sync && !per->skip) {
     struct_stat fileinfo;
     if(!curlx_stat(per->outfile, &fileinfo)) {
       /* file exists, use its modification time for conditional request */
@@ -1210,6 +1212,22 @@ static CURLcode single_transfer(struct OperationConfig *config,
       warnf("Got more output options than URLs");
       break;
     }
+
+    /* Restore sync-related state from when this URL was added */
+    config->sync = u->sync;
+    if(u->sync) {
+      /* Restore other sync-related settings */
+      config->remote_time = TRUE;
+      config->fail = FAIL_WO_BODY;
+      config->timecond = CURL_TIMECOND_IFMODSINCE;
+      /* Note: useremote is already set in u->useremote */
+    }
+    else {
+      /* Ensure sync state is clean for non-sync URLs */
+      config->remote_time = FALSE;
+      config->fail = FAIL_NONE;
+      config->timecond = CURL_TIMECOND_NONE;
+    }
     if(u->infile) {
       if(!config->globoff && !glob_inuse(&state->inglob))
         result = glob_url(&state->inglob, u->infile, &state->upnum, err);
@@ -1334,7 +1352,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
     outs->out_null = u->out_null;
     if(!outs->out_null &&
        (u->useremote || (per->outfile && strcmp("-", per->outfile)))) {
-      result = setup_outfile(config, per, outs, skipped);
+      result = setup_outfile(config, per, outs, u, skipped);
       if(result)
         return result;
     }
@@ -2181,8 +2199,14 @@ static CURLcode run_all_transfers(CURLSH *share,
   if(!result) {
     if(global->parallel)
       result = parallel_transfers(share);
-    else
-      result = serial_transfers(share);
+    else {
+      /* Check if we need to split execution into sync batches */
+      if(sync_should_split_batches(global->current))
+        result = sync_execute_batches(global->current, share,
+                                      serial_transfers);
+      else
+        result = serial_transfers(share);
+    }
   }
 
   /* cleanup if there are any left */

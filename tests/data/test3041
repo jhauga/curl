@@ -28,7 +28,7 @@ Content-Length: 0
 http
 </server>
 <name>
-HTTP GET with --sync rejects 302 redirect
+HTTP GET with --sync rejects 302 redirect without -L
 </name>
 <command option="no-include">
 --sync --output-dir %LOGDIR http://%HOSTIP:%HTTPPORT/%TESTNUMBER

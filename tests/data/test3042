@@ -26,7 +26,7 @@ Server: test-server/fake
 http
 </server>
 <name>
-HTTP GET with --sync rejects 304 Not Modified
+HTTP GET with --sync accepts 304 Not Modified
 </name>
 <command option="no-include">
 --sync --output-dir %LOGDIR http://%HOSTIP:%HTTPPORT/%TESTNUMBER
@@ -45,9 +45,6 @@ Accept: */*
 </protocol>
 <stdout>
 </stdout>
-# Should fail with write error for non-2xx response
-<errorcode>
-23
-</errorcode>
+# 304 Not Modified is a success - no error expected
 </verify>
 </testcase>

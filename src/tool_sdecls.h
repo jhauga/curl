@@ -97,6 +97,7 @@ struct getout {
   BIT(noupload);  /* if set, -T "" has been used */
   BIT(noglob);    /* disable globbing for this URL */
   BIT(out_null);  /* discard output for this URL */
+  BIT(sync);      /* if set, this URL uses --sync behavior */
 };
 /*
  * 'trace' enumeration represents curl's output look'n feel possibilities.

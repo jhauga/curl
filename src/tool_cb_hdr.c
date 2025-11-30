@@ -133,10 +133,21 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     long response = 0;
     curl_easy_getinfo(per->curl, CURLINFO_RESPONSE_CODE, &response);
 
-    /* For --sync mode, only accept 2xx responses */
-    if(per->config->sync && response && (response/100 != 2)) {
-      /* non-2xx response in sync mode, treat as error */
-      return CURL_WRITEFUNC_ERROR;
+    /* For --sync mode, only accept 2xx responses, 304, and 3xx if following */
+    if(per->config->sync && response) {
+      if(response == 304) {
+        /* 304 Not Modified is success - local file is already up to date */
+        /* Allow it to proceed normally */
+      }
+      else if(response/100 == 3) {
+        /* 3xx redirect: only allow if -L/--location is enabled */
+        if(!per->config->followlocation)
+          return CURL_WRITEFUNC_ERROR;
+      }
+      else if(response/100 != 2) {
+        /* non-2xx/3xx response in sync mode, treat as error */
+        return CURL_WRITEFUNC_ERROR;
+      }
     }
 
     if((response/100 != 2) && (response/100 != 3))

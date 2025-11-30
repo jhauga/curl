@@ -332,7 +332,7 @@ static const struct LongShort aliases[]= {
   {"stderr",                     ARG_FILE, ' ', C_STDERR},
   {"styled-output",              ARG_BOOL, ' ', C_STYLED_OUTPUT},
   {"suppress-connect-headers",   ARG_BOOL, ' ', C_SUPPRESS_CONNECT_HEADERS},
-  {"sync",                        ARG_BOOL, ' ', C_SYNC},
+  {"sync",                        ARG_BOOL|ARG_NO, ' ', C_SYNC},
   {"tcp-fastopen",               ARG_BOOL, ' ', C_TCP_FASTOPEN},
   {"tcp-nodelay",                ARG_BOOL, ' ', C_TCP_NODELAY},
   {"telnet-option",              ARG_STRG, 't', C_TELNET_OPTION},
@@ -1089,8 +1089,22 @@ static ParameterError add_url(struct OperationConfig *config,
     /* fill in the URL */
     err = getstr(&url->url, thisurl, DENY_BLANK);
     url->urlset = TRUE;
-    if(remote_noglob)
+    
+    /* Capture sync state at the time this URL is added */
+    url->sync = config->sync;
+    
+    /* Set useremote based on sync state and other options.
+     * Only set if not already set by previous options like -O */
+    if(remote_noglob) {
       url->useremote = url->noglob = TRUE;
+    }
+    else if(config->sync && !url->outset) {
+      /* sync implies remote name, but only if output not explicitly set */
+      url->useremote = TRUE;
+    }
+    /* Note: Don't force useremote = FALSE for non-sync URLs, as it may have
+     * been set by -O/--remote-name */
+    
     if(!err && (++config->num_urls > 1) &&
        (config->etag_save_file || config->etag_compare_file)) {
       errorf("The etag options only work on a single URL");
@@ -1311,8 +1325,9 @@ static ParameterError parse_output(struct OperationConfig *config,
     config->url_out = config->url_list;
   if(config->url_out) {
     /* there is a node here, if it already is filled-in continue to find
-       an "empty" node */
-    while(config->url_out && config->url_out->outset)
+       an "empty" node. Skip nodes with sync=TRUE since sync implies
+       using the remote name. */
+    while(config->url_out && (config->url_out->outset || config->url_out->sync))
       config->url_out = config->url_out->next;
   }
 
@@ -1334,7 +1349,9 @@ static ParameterError parse_output(struct OperationConfig *config,
     err = getstr(&url->outfile, nextarg, DENY_BLANK);
   else
     url->outfile = NULL;
-  url->useremote = FALSE; /* switch off */
+  /* Don't override useremote if sync is set (sync implies remote name) */
+  if(!url->sync)
+    url->useremote = FALSE; /* switch off */
   url->outset = TRUE;
   url->out_null = !nextarg;
   return err;
@@ -1354,8 +1371,9 @@ static ParameterError parse_remote_name(struct OperationConfig *config,
     config->url_out = config->url_list;
   if(config->url_out) {
     /* there is a node here, if it already is filled-in continue to find
-       an "empty" node */
-    while(config->url_out && config->url_out->outset)
+       an "empty" node. Skip nodes with sync=TRUE since sync implies
+       using the remote name. */
+    while(config->url_out && (config->url_out->outset || config->url_out->sync))
       config->url_out = config->url_out->next;
   }
 
@@ -2054,12 +2072,15 @@ static ParameterError opt_bool(struct OperationConfig *config,
   case C_SYNC: /* --sync */
     if(toggle) {
       config->sync = TRUE;
-      config->remote_name_all = TRUE;
       config->remote_time = TRUE;
       config->fail = FAIL_WO_BODY; /* fail silently on HTTP errors */
+      config->timecond = CURL_TIMECOND_IFMODSINCE;
     }
     else {
       config->sync = FALSE;
+      config->remote_time = FALSE;
+      config->fail = FAIL_NONE;
+      config->timecond = CURL_TIMECOND_NONE;
     }
     break;
   case C_MAIL_RCPT_ALLOWFAILS: /* --mail-rcpt-allowfails */
